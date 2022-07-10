@@ -10,6 +10,7 @@ export * from './contract/Invoice';
 export * from './contract/InvoicePosition';
 export * from './contract/Settings';
 export * from './contract/general';
+export * from './contract/Api';
 
 // Libs
-export * from './lib/validation/index'
+export * from './lib/validation/index';
