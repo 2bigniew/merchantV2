@@ -7,13 +7,13 @@ import {
   EVENT,
   COMMAND,
 } from '@merchant-workspace/api-interfaces';
+import {socketConnection} from "../core/socketConnection";
 
 type sendCommandFunction = (
   command: Command
 ) => Promise<Event | CommandFailure>;
 
 const useCommand = (): sendCommandFunction => {
-  const socket = io.connect('http://127.0.0.1:3333');
 
   const sendCommand = async (
     command: Command
@@ -22,25 +22,25 @@ const useCommand = (): sendCommandFunction => {
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        socket.off(EVENT);
+        socketConnection.off(EVENT);
         reject();
       }, 5000);
 
-      socket.on(EVENT, (event: Event | CommandFailure) => {
+      socketConnection.on(EVENT, (event: Event | CommandFailure) => {
         if (event.name === success) {
           clearTimeout(timeout);
-          socket.off(EVENT);
+          socketConnection.off(EVENT);
           resolve(event);
         }
 
         if (event.name === failure) {
           clearTimeout(timeout);
-          socket.off(EVENT);
+          socketConnection.off(EVENT);
           resolve(event);
         }
       });
 
-      socket.emit(COMMAND, command);
+      socketConnection.emit(COMMAND, command);
     });
   };
 

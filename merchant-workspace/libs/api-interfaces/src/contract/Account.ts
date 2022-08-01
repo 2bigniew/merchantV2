@@ -17,7 +17,7 @@ export type CreateAccountPayload = {
     email: string
 }
 
-export type LoginPayload = Pick<Account, 'email' | 'password'>
+export type AuthPayload = Pick<Account, 'email' | 'password'>
 
 export type UpdateAccountPayload = Partial<CreateAccountPayload> & { id: number }
 

@@ -1,4 +1,4 @@
-import { Account } from './Account';
+import {Account, AuthPayload} from './Account';
 import { Company } from './Company';
 import { Customer } from './Customer';
 import { Invoice, PublicInvoice } from './Invoice';
@@ -16,6 +16,10 @@ export interface Api {
       limit?: number;
     };
   };
+  'api/v1/account/authentication': {
+    response: Account & { token: string };
+    body: AuthPayload;
+  }
   'api/v1/company/:id': {
     params: [number];
     response: Company;

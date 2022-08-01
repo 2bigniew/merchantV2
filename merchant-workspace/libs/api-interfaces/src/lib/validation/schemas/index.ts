@@ -13,7 +13,7 @@ export const currencySchema = Joi.string().valid(...CURRENCY_VALUES)
 
 export const dbObjectWrapperSchema = Joi.object({
   id: idSchema.required(),
-  createdAt: Joi.string().required(),
+  createdAt: Joi.date().required(),
 })
 
 export const commandTypeSchema = Joi.string()

@@ -29,6 +29,7 @@ export class EventService {
       ...getListenersCountForEvents(),
       ...LISTENERS_COUNT_FOR_EVENTS,
     }
+    this.broker.setMaxListeners(40)
   }
 
   public onSocketCommandHandler = (args: any) => {
@@ -52,9 +53,10 @@ export class EventService {
     const listenersLimit = this.listenersCountsForEvents[eventName] || 1
     if (this.broker.listenerCount(eventName) >= listenersLimit) {
       // TODO TEMP - find better solution
-      this.logger.log(`Listeners for ${eventName} already declared`)
+      this.logger.log(`Listeners for ${eventName} was already declared`)
       return
     }
+
     this.broker.addListener(eventName, (payload: any) => {
       const event = this.prepareEvent({
         type: EVENT,

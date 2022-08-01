@@ -12,6 +12,7 @@ import EventService from "./app/services/event/eventService";
 
 export const initializeListeners = (socket: Socket) => {
   console.log('Socket: client connected')
+  console.log(socket.id)
 
   socket.on(COMMAND, async (args) => {
     EventService.onSocketCommandHandler(args)

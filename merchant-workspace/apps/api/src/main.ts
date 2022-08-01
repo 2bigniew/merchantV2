@@ -59,4 +59,5 @@ runServer();
  *  - GUS integration
  *  - client app
  *  - tests
+ *  - add linter, prettier
  */

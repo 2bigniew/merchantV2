@@ -1,7 +1,12 @@
-import { Account, CreateAccountPayload, UpdateAccountPayload } from '@merchant-workspace/api-interfaces'
+import {Account, AuthPayload, CreateAccountPayload, UpdateAccountPayload} from '@merchant-workspace/api-interfaces'
 import { TableName } from '@merchant-workspace/api-interfaces'
 import { Database } from 'sqlite3'
-import { mapDBObjectToJSFormat, prepareUpdateProps, removeUndefined } from '../../services/db/helpers'
+import {
+  mapDBObjectToJSFormat,
+  mapJSObjectToDBFormat, prepareConditions,
+  prepareUpdateProps,
+  removeUndefined
+} from '../../services/db/helpers'
 import {DB} from "../../services/db/sqlite-main";
 import connection from "../../services/db/connection";
 
@@ -20,6 +25,16 @@ export class AccountRepository extends DB {
     const query = `SELECT * FROM ${this.tableName} WHERE id = $id LIMIT 1;`
     const account = await this.get<Account, { id: number }>(query, { id })
     return mapDBObjectToJSFormat(account)
+  }
+
+  public async getAccountByAuthData(payload: AuthPayload): Promise<undefined | Account> {
+    const dbObject = mapJSObjectToDBFormat(payload);
+    const query = `SELECT * FROM ${this.tableName} ${prepareConditions(dbObject)} LIMIT 1;`;
+    const accounts = await this.all<Account, undefined>(query);
+
+    if (accounts[0]) {
+      return accounts[0];
+    }
   }
 
   public async createAccount(payload: CreateAccountPayload): Promise<number> {
