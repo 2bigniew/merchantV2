@@ -1,0 +1,5 @@
+$breakpoint-desktop: 1024px;
+
+@mixin desktop {
+  @media (min-width: $breakpoint-desktop) { @content; }
+}

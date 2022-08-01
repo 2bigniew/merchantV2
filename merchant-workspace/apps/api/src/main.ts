@@ -1,19 +1,20 @@
 import * as express from 'express';
 import * as socketIo from 'socket.io';
+import * as cors from 'cors';
 import { Message } from '@merchant-workspace/api-interfaces';
 import initDB from './app/services/db/init';
 import { initializeListeners } from './socket';
 import { router } from './router';
+import {fixtures} from "./app/services/db/fixtures";
 
 const port = process.env.port || 3333;
 
 const runServer = async (): Promise<void> => {
   const app = appFactory();
-  // app.enableCors() // TODO on development toggle
 
   try {
     await initDB.initHandler();
-    // await fixtures()
+    await fixtures()
   } catch (e) {
     console.log(e);
   }

@@ -1,4 +1,4 @@
-import {AccountListenerResponse, CreateAccountPayload, UpdateAccountPayload} from "./Account";
+import {AccountListenerResponse, CreateAccountPayload, LoginPayload, UpdateAccountPayload} from "./Account";
 import {CompanyListenerResponse, CreateCompanyPayload, UpdateCompanyPayload} from "./Company";
 import {CreateCustomerPayload, CustomerListenerResponse, UpdateCustomerPayload} from "./Customer";
 import {CreateInvoicePayload, InvoiceListenerResponse, UpdateInvoicePayload} from "./Invoice";
@@ -13,6 +13,7 @@ export const COMMANDS_NAMES = [
     'command.account.create',
     'command.account.update',
      'command.account.delete',
+     'command.account.login',
      'command.company.create',
      'command.company.update',
      'command.company.delete',
@@ -34,6 +35,8 @@ export type CommandsFailuresNames = `${CommandsNames}.failed`
 type CommandBase<N extends CommandsNames, P> = { name: N; payload: P }
 
 export type CommandAccountCreate = CommandBase<'command.account.create', CreateAccountPayload>
+
+export type CommandAccountLogin = CommandBase<'command.account.login', LoginPayload>
 
 export type CommandAccountUpdate = CommandBase<'command.account.update', UpdateAccountPayload>
 
@@ -79,6 +82,7 @@ export type Command = { type: 'command'} & (
     | CommandInvoicePositionCreate
     | CommandInvoicePositionUpdate
     | CommandInvoicePositionDelete
+    | CommandAccountLogin
     )
 
 export type CommandFailure = {
@@ -103,6 +107,10 @@ export const COMMANDS_TO_EVENTS: Record<
   success: 'event.account.deleted',
   failure: 'command.account.delete.failed',
  },
+  'command.account.login': {
+    success: 'event.account.authorized',
+    failure: 'command.account.login.failed',
+  },
  'command.company.create': {
   success: 'event.company.created',
   failure: 'command.company.create.failed',
@@ -154,9 +162,9 @@ export const COMMANDS_TO_EVENTS: Record<
 }
 
 
-export type CommandListenerRespone<T extends CommandsNames> = 
-    | AccountListenerResponse<T> 
-    | CompanyListenerResponse<T> 
+export type CommandListenerRespone<T extends CommandsNames> =
+    | AccountListenerResponse<T>
+    | CompanyListenerResponse<T>
     | CustomerListenerResponse<T>
     | InvoiceListenerResponse<T>
     | InvoicePositionListenerResponse<T>

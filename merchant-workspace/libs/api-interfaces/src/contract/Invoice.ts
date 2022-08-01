@@ -5,7 +5,7 @@ import { InvoicePosition } from './InvoicePosition';
 
 export interface Invoice {
   id: number;
-  accountId: number;
+  accountId: number; // TODO add companyId
   customerId: number;
   invoiceNumber: string;
   priceNet: number;

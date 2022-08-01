@@ -5,7 +5,8 @@ import invoiceRepository from "../../modules/invoice/invoice-repository";
 
 export const fixtures = async (): Promise<void> => {
   // TODO check is database empty
-  if (process.env.NODE_ENV === 'development') {
+
+  if (process.env.NODE_ENV === 'development' && (await accountRepository.lastId()) < 1) {
     await initDB.initTestAccountData()
     const accountId = await accountRepository.lastId()
     await initDB.initTestCompanyData(accountId)

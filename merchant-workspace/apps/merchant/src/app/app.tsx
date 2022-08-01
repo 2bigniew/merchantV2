@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { Message } from '@merchant-workspace/api-interfaces';
+import React from 'react';
+
+import styles from './app.module.scss';
+import MerchantRouter from "./core/routing/Router";
 
 export const App = () => {
-  const [m, setMessage] = useState<Message>({ message: '' });
-
-  useEffect(() => {
-    fetch('/api')
-      .then((r) => r.json())
-      .then(setMessage);
-  }, []);
 
   return (
     <>
-      <div style={{ textAlign: 'center' }}>
-        <h1>Welcome to merchant!</h1>
-        <img
-          width="450"
-          src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png"
-          alt="Nx - Smart, Fast and Extensible Build System"
-        />
+      <div className={styles['container']}>
+        <div className={styles['navigation']}>
+          <nav>
+            <ul>
+              <li>Customers</li>
+              <li>Companies</li>
+              <li>Invoices</li>
+            </ul>
+          </nav>
+        </div>
+        <div className={styles['content']}>
+          <MerchantRouter loggedIn={false} />
+        </div>
       </div>
-      <div>{m.message}</div>
     </>
   );
 };

@@ -17,17 +17,13 @@ export type CreateAccountPayload = {
     email: string
 }
 
+export type LoginPayload = Pick<Account, 'email' | 'password'>
+
 export type UpdateAccountPayload = Partial<CreateAccountPayload> & { id: number }
 
-export interface AccountRouter {
-    'account/list': {
-        response: Account[]
-    }
-}
-
-type AccountCommandsName = Extract<CommandsNames, 'command.account.create' | 'command.account.update' | 'command.account.delete'>
+type AccountCommandsName = Extract<CommandsNames, 'command.account.create' | 'command.account.update' | 'command.account.delete' | 'command.account.login'>
 
 export type AccountListenerResponse<T>  =  T extends AccountCommandsName
-    ? Changed<Account> 
-    : never 
+    ? Changed<Account>
+    : never
 

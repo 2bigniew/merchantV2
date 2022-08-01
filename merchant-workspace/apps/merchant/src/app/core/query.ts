@@ -49,8 +49,10 @@ async function query<URL extends keyof Api>(
   const query = parseQueryParams(queryParams);
   const fullUrl = `${url}${query}`;
 
+  // TODO add try / catch, get rid of casting
+
   if (!params || (params && !params.length)) {
-    return (await apiClient.get(fullUrl)) as Api[URL]['response'];
+    return (await apiClient.get(fullUrl)).data as Api[URL]['response'];
   }
 
   const regexp = /:[a-zA-Z\d]+/gm;
@@ -63,7 +65,7 @@ async function query<URL extends keyof Api>(
     i++;
   }
 
-  return (await apiClient.get(url), params) as Api[URL]['response']; // TODO get rid of casting, add params
+  return (await apiClient.get(fullUrl)).data as Api[URL]['response']; // TODO get rid of casting
 }
 
 /**

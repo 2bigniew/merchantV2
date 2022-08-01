@@ -13,6 +13,7 @@ export const EVENTS_NAMES = [
     'event.account.created',
     'event.account.updated',
     'event.account.deleted',
+    'event.account.authorized',
     'event.company.created',
     'event.company.updated',
     'event.company.deleted',
@@ -36,6 +37,8 @@ export type EventAccountCreate = EventBase<'event.account.created', Account>
 export type EventAccountUpdate = EventBase<'event.account.updated', Account>
 
 export type EventAccountDelete = EventBase<'event.account.deleted', Account>
+
+export type EventAccountAuthorized = EventBase<'event.account.authorized', Account>
 
 export type EventCompanyCreate = EventBase<'event.company.created', Company>
 
@@ -77,4 +80,5 @@ export type Event = { type: 'event'} & (
     | EventInvoicePositionCreate
     | EventInvoicePositionUpdate
     | EventInvoicePositionDelete
+    | EventAccountAuthorized
     )
