@@ -1,14 +1,20 @@
 import React, {useEffect, useState} from 'react'
 import {Account} from "@merchant-workspace/api-interfaces";
 import query from "../core/query";
+import {useAsync} from "../hooks/useAsyncEffect";
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const { execute, status, value: response, error} = useAsync(async () => query('api/v1/account/list', "GET"))
 
   useEffect(() => {
-    query('api/v1/account/list').then((accounts) => {
-      setAccounts(accounts)
-    })
+    if (response) {
+      setAccounts(response)
+    }
+
+    if (error) {
+      console.error(error)
+    }
   }, []);
 
   return <div>

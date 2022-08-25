@@ -1,6 +1,6 @@
-import { EVENT, EventsNames, Event } from '@merchant-workspace/api-interfaces'
-import { validateCommand, validateEvent, validateSchema } from '@merchant-workspace/api-interfaces'
-import * as EventEmitter from 'events'
+import { EVENT, EventsNames, Event } from "@merchant-workspace/api-interfaces";
+import { validateCommand, validateEvent, validateSchema } from "@merchant-workspace/api-interfaces";
+import * as EventEmitter from "events";
 import {
   Command,
   COMMAND_FAILURE,
@@ -9,62 +9,71 @@ import {
   CommandsFailuresNames,
   CommandListenerRespone,
   schemas
-} from '@merchant-workspace/api-interfaces'
-import { Socket } from 'socket.io'
-import {
-  getListenersCountForEvents,
-  LISTENERS_COUNT_FOR_EVENTS,
-  ListenersCountForEvents,
-} from './helpers'
+} from "@merchant-workspace/api-interfaces";
+import { Socket } from "socket.io";
+import { getListenersCountForEvents, LISTENERS_COUNT_FOR_EVENTS, ListenersCountForEvents } from "./helpers";
 
 export class EventService {
   listenersCountsForEvents: Partial<ListenersCountForEvents>;
-  // private readonly logger = new Logger('EventService')
-  private readonly logger = console
+  // TODO add logger: private readonly logger = new Logger('EventService')
+  // TODO add error handling
+  // TODO REWRITE
 
-  constructor(
-    private readonly broker: EventEmitter
-  ) {
+  private readonly logger = console;
+
+  constructor(private readonly broker: EventEmitter) {
     this.listenersCountsForEvents = {
       ...getListenersCountForEvents(),
-      ...LISTENERS_COUNT_FOR_EVENTS,
-    }
-    this.broker.setMaxListeners(40)
+      ...LISTENERS_COUNT_FOR_EVENTS
+    };
+    this.broker.setMaxListeners(60);
   }
 
   public onSocketCommandHandler = (args: any) => {
-    const command = this.prepareCommand(args)
-    this.emitCommand(command)
-  }
+    const command = this.prepareCommand(args);
+
+    if (command) {
+      this.emitCommand(command);
+    }
+  };
 
   public onCommandHandler<T extends Command>(
-    commandName: T['name'],
-    callback: (payload: T['payload']) => Promise<CommandListenerRespone<T['name']>>,
+    commandName: T["name"],
+    callback: (payload: T["payload"]) => Promise<CommandListenerRespone<T["name"]>>
   ): void {
-    const { success } = COMMANDS_TO_EVENTS[commandName]
+    const { success, failure } = COMMANDS_TO_EVENTS[commandName];
 
-    this.broker.addListener(commandName, async (payload: T['payload']) => {
-      const response = await callback(payload)
-      this.broker.emit(success, response)
-    })
+    this.broker.addListener(commandName, async (payload: T["payload"]) => {
+      try {
+        const response = await callback(payload);
+        this.broker.emit(success, response);
+      } catch (error) {
+        console.error(error);
+        this.broker.emit(failure, error);
+      }
+    });
   }
 
   public onEventSuccessHandler(socket: Socket, eventName: EventsNames): void {
-    const listenersLimit = this.listenersCountsForEvents[eventName] || 1
+    const listenersLimit = this.listenersCountsForEvents[eventName] || 1;
     if (this.broker.listenerCount(eventName) >= listenersLimit) {
       // TODO TEMP - find better solution
-      this.logger.log(`Listeners for ${eventName} was already declared`)
-      return
+      this.logger.log(`Listeners for ${eventName} was already declared`);
+      return;
     }
 
     this.broker.addListener(eventName, (payload: any) => {
       const event = this.prepareEvent({
         type: EVENT,
         name: eventName,
-        payload,
-      })
-      this.emitSocketEvent(socket, event)
-    })
+        payload
+      });
+
+      if (event) {
+        this.logger.log(event);
+        this.emitSocketEvent(socket, event);
+      }
+    });
   }
 
   public onEventFailHandler(socket: Socket, commandFailureName: CommandsFailuresNames): void {
@@ -72,37 +81,61 @@ export class EventService {
       const commandFailure = {
         type: COMMAND_FAILURE,
         name: commandFailureName,
-        payload,
-      }
-      this.emitSocketEvent(socket, commandFailure)
-    })
+        payload
+      };
+      this.emitSocketEvent(socket, commandFailure);
+    });
   }
 
   private emitSocketEvent(socket: Socket, socketEvent: Event | CommandFailure) {
     try {
-      socket.emit(socketEvent.type, socketEvent)
-      this.logger.log(`Socket event emitted, type: ${socketEvent.type}, name: ${socketEvent.name}`)
+      socket.emit(socketEvent.type, socketEvent);
+      this.logger.log(`Socket event emitted, type: ${socketEvent.type}, name: ${socketEvent.name}`);
     } catch (e) {
-      this.logger.error(e)
+      this.logger.error(e);
     }
   }
 
-  private prepareCommand(args: any): Command {
-    const { name, payload } = args
-    const commandName = validateSchema(name, schemas.main.commandTypeSchema)
-    return validateCommand(commandName, payload)
+  private prepareCommand(args: any): Command | undefined {
+    const { name, payload } = args;
+    const commandName = validateSchema(name, schemas.main.commandTypeSchema);
+    const { failure } = COMMANDS_TO_EVENTS[commandName];
+    try {
+      return validateCommand(commandName, payload);
+    } catch (error) {
+      this.logger.error(error);
+      this.broker.emit(failure, error);
+      return;
+    }
   }
 
-  private prepareEvent(args: any): Event {
-    const { name, payload } = args
-    const eventName = validateSchema(name, schemas.main.eventTypeSchema)
-    return validateEvent(eventName, payload)
+  private prepareEvent(args: any): Event | undefined {
+    const { name, payload } = args;
+    const eventName = validateSchema(name, schemas.main.eventTypeSchema);
+    let failure: CommandsFailuresNames;
+
+    for (const { success, failure: failureName } of Object.values(COMMANDS_TO_EVENTS)) {
+      if (eventName === success) {
+        failure = failureName;
+      }
+    }
+
+    try {
+      return validateEvent(eventName, payload);
+    } catch (error) {
+      this.logger.error(error);
+
+      if (failure) {
+        this.broker.emit(failure, error);
+      }
+      return;
+    }
   }
 
   private emitCommand(command: Command): void {
-    this.broker.emit(command.name, command.payload)
-    this.logger.log(`Command: ${command.name} succeed`)
+    this.broker.emit(command.name, command.payload);
+    this.logger.log(`Command: ${command.name} succeed`);
   }
 }
 
-export default new EventService(new EventEmitter())
+export default new EventService(new EventEmitter());

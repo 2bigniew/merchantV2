@@ -1,7 +1,7 @@
-import { CommandsNames } from './Command';
-import { Changed } from './Event';
-import { Currency } from './general';
-import { InvoicePosition } from './InvoicePosition';
+import { CommandsNames } from "./Command";
+import { Changed } from "./Event";
+import { Currency } from "./general";
+import { InvoicePosition } from "./InvoicePosition";
 
 export interface Invoice {
   id: number;
@@ -25,7 +25,7 @@ export type PublicInvoice = Invoice & {
   positions: InvoicePosition[];
 };
 
-export type CreateInvoicePayload = Omit<Invoice, 'id' | 'createdAt'>;
+export type CreateInvoicePayload = Omit<Invoice, "id" | "createdAt">;
 
 export type UpdateInvoicePayload = Partial<CreateInvoicePayload> & {
   id: number;
@@ -33,9 +33,7 @@ export type UpdateInvoicePayload = Partial<CreateInvoicePayload> & {
 
 type InvoiceCommandsName = Extract<
   CommandsNames,
-  'command.invoice.create' | 'command.invoice.update' | 'command.invoice.delete'
+  "command.invoice.create" | "command.invoice.update" | "command.invoice.delete"
 >;
 
-export type InvoiceListenerResponse<T> = T extends InvoiceCommandsName
-  ? Changed<Invoice>
-  : never;
+export type InvoiceListenerResponse<T> = T extends InvoiceCommandsName ? Changed<Invoice> : never;

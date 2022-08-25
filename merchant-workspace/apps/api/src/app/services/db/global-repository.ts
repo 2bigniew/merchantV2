@@ -9,5 +9,5 @@ export const repository = {
   company: companyRepository,
   customer: customerRepository,
   invoice: invoiceRepository,
-  invoicePosition: invoicePositionRepository,
-}
+  invoicePosition: invoicePositionRepository
+};

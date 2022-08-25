@@ -1,6 +1,8 @@
-import { Api } from '@merchant-workspace/api-interfaces';
-import { apiClient } from './apiClient';
+import { Api } from "@merchant-workspace/api-interfaces";
+import { apiClient } from "./apiClient";
+import { AxiosError } from "axios";
 
+type HttpMethod = "GET" | "POST";
 type QueryObject = Record<string, unknown>;
 type ContainsKey<T, K extends string | number, ELSE> = T extends {
   [key in K]: any;
@@ -10,13 +12,13 @@ type ContainsKey<T, K extends string | number, ELSE> = T extends {
 
 const parseQueryParams = (queryObject?: QueryObject): string => {
   if (!queryObject) {
-    return '';
+    return "";
   }
 
   const entries = Object.entries(queryObject);
 
   if (!entries.length) {
-    return '';
+    return "";
   }
 
   const queryArray: string[] = [];
@@ -25,52 +27,94 @@ const parseQueryParams = (queryObject?: QueryObject): string => {
     queryArray.push(`${key}=${value}`);
   }
 
-  return `?${queryArray.join('&')}`;
+  return `?${queryArray.join("&")}`;
 };
 
-async function query<URL extends keyof Api>(
-  url: URL
-): Promise<Api[URL]['response']>;
+async function query<URL extends keyof Api>(url: URL, method: HttpMethod): Promise<Api[URL]["response"]>;
 async function query<URL extends keyof Api>(
   url: URL,
-  queryParams: ContainsKey<Api[URL], 'queryParams', QueryObject>
-): Promise<Api[URL]['response']>;
+  method: HttpMethod,
+  queryParams: ContainsKey<Api[URL], "queryParams", QueryObject>
+): Promise<Api[URL]["response"]>;
 async function query<URL extends keyof Api>(
   url: URL,
-  queryParams: ContainsKey<Api[URL], 'queryParams', QueryObject>,
-  params: ContainsKey<Api[URL], 'params', never>
-): Promise<Api[URL]['response']>;
-
+  method: HttpMethod,
+  queryParams: ContainsKey<Api[URL], "queryParams", QueryObject>,
+  params: ContainsKey<Api[URL], "params", null>
+): Promise<Api[URL]["response"]>;
 async function query<URL extends keyof Api>(
   url: URL,
-  queryParams?: ContainsKey<Api[URL], 'queryParams', QueryObject>,
-  params?: ContainsKey<Api[URL], 'params', never>
-): Promise<Api[URL]['response']> {
+  method: HttpMethod,
+  queryParams: ContainsKey<Api[URL], "queryParams", QueryObject>,
+  params: ContainsKey<Api[URL], "params", null>,
+  body: ContainsKey<Api[URL], "body", QueryObject>
+): Promise<Api[URL]["response"]>;
+async function query<URL extends keyof Api>(
+  url: URL,
+  httpMethod: HttpMethod,
+  queryParams?: ContainsKey<Api[URL], "queryParams", QueryObject>,
+  params?: ContainsKey<Api[URL], "params", never>,
+  body?: ContainsKey<Api[URL], "body", never>
+): Promise<Api[URL]["response"]> {
   const query = parseQueryParams(queryParams);
   const fullUrl = `${url}${query}`;
+  const endpointMethod: Api[URL]["method"] = httpMethod;
+  const method = getHttpMethod(endpointMethod);
 
-  // TODO add try / catch, get rid of casting
+  // TODO get rid of casting
 
-  if (!params || (params && !params.length)) {
-    return (await apiClient.get(fullUrl)).data as Api[URL]['response'];
+  try {
+    if (body) {
+      const response = (await apiClient({ method, url: fullUrl, data: body })).data as Api[URL]["response"];
+      return response;
+    }
+
+    if (!params || (params && !params.length)) {
+      const response = (await apiClient(fullUrl, { method })).data as Api[URL]["response"];
+      return response;
+    }
+
+    const regexp = /:[a-zA-Z\d]+/gm;
+    let i = 0;
+
+    for (const param of fullUrl.matchAll(regexp)) {
+      const valueToReplace = param[0];
+      const destinedValue = params[i];
+      fullUrl.replace(valueToReplace, `${destinedValue}`);
+      i++;
+    }
+
+    const response = (await apiClient(fullUrl, { method })).data as Api[URL]["response"]; // TODO get rid of casting
+    return response;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      const status = error.response?.status ?? 0;
+      if ([400, 401, 404, 409].includes(status)) {
+        const message = typeof error.response?.data === "string" ? error.response.data : error.message;
+        throw new Error(message);
+      }
+    }
+
+    throw error;
   }
-
-  const regexp = /:[a-zA-Z\d]+/gm;
-  let i = 0;
-
-  for (const param of fullUrl.matchAll(regexp)) {
-    const valueToReplace = param[0];
-    const destinedValue = params[i];
-    fullUrl.replace(valueToReplace, `${destinedValue}`);
-    i++;
-  }
-
-  return (await apiClient.get(fullUrl)).data as Api[URL]['response']; // TODO get rid of casting
 }
+
+const getHttpMethod = (method: HttpMethod): "get" | "post" => {
+  switch (method) {
+    case "GET":
+      return "get";
+    case "POST":
+      return "post";
+    default:
+      return "get";
+  }
+};
 
 /**
  * example
- * query('api/v1/account/:id', {}, [2]);
+ * query('api/v1/account/:id', "GET", {}, [2]);
+ * query('api/v1/account/:id', "POST", {}, {}, { id: 1 });
+ * query('api/v1/account/:id', "GET");
  */
 
 export default query;

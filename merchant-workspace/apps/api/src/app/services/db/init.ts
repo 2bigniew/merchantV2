@@ -1,10 +1,10 @@
-import { Database } from 'sqlite3'
-import { DB } from './sqlite-main'
+import { Database } from "sqlite3";
+import { DB } from "./sqlite-main";
 import connection from "./connection";
 
 class InitDB extends DB {
   constructor(db: Database) {
-    super(db)
+    super(db);
   }
 
   public async initHandler(): Promise<void> {
@@ -17,7 +17,7 @@ class InitDB extends DB {
                 password TEXT NOT NULL,
                 email VARCHAR (255) UNIQUE NOT NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );`)
+            );`);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS company (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -35,7 +35,7 @@ class InitDB extends DB {
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (account_id)
                     REFERENCES account (id)
-            );`)
+            );`);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -46,7 +46,7 @@ class InitDB extends DB {
                 currency VARCHAR (255),
                 FOREIGN KEY (account_id)
                     REFERENCES account (id)
-            );`)
+            );`);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS customer (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -64,7 +64,7 @@ class InitDB extends DB {
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (account_id)
                     REFERENCES account (id)
-            );`)
+            );`);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS invoice (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -85,7 +85,7 @@ class InitDB extends DB {
                     REFERENCES account (id),
                 FOREIGN KEY (customer_id)
                     REFERENCES customer (id)
-            );`)
+            );`);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS invoice_position (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -103,17 +103,17 @@ class InitDB extends DB {
                 currency VARCHAR (255) NOT NULL,
                 FOREIGN KEY (invoice_id)
                     REFERENCES invoice (id)
-            );`)
-      })
+            );`);
+      });
 
-      this.db.prepare('SELECT * FROM account', (err) => {
+      this.db.prepare("SELECT * FROM account", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async initTestAccountData(): Promise<void> {
@@ -124,17 +124,17 @@ class InitDB extends DB {
           ('Aldo', 'Djorevic', 'uZG5tPSVDX', 'adjorevic1@loc.gov'),
           ('Howie', 'Mix', 'xz8NMuYXt4M', 'hmix2@ask.com'),
           ('Gustav', 'Craigmile', 'h71aesLPwHZ', 'gcraigmile3@rediff.com'),
-          ('Gabrielle', 'Cadany', 'DbcTQKAWJ', 'gcadany4@histats.com');`)
-      })
+          ('Gabrielle', 'Cadany', 'DbcTQKAWJ', 'gcadany4@histats.com');`);
+      });
 
-      this.db.prepare('SELECT * FROM account', (err) => {
+      this.db.prepare("SELECT * FROM account", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async initTestCompanyData(accountId: number): Promise<void> {
@@ -148,17 +148,17 @@ class InitDB extends DB {
           (${accountId}, 'Mat Lam Tam','Buena Vista','888','1','64-630','Ryczywół','Poland','9954598880','76618335797783923466','Trippledex Bank'),
           (${accountId}, 'Stronghold','Harbort','329','87','75-571','Osiek nad Notecią','Poland','3176427991','74342351246453927637','Prodder Bank'),
           (${accountId}, 'Transcof','Montana','206','102','38-123','Wysoka Strzyżowska','Poland','7195596289','65693911804359744968','Hatity Bank'),
-          (${accountId}, 'Fintone','Kensington','92','25','34-105','Radocza','Poland','9729326333','27436131917979079435','Flexidy Bank');`)
-      })
+          (${accountId}, 'Fintone','Kensington','92','25','34-105','Radocza','Poland','9729326333','27436131917979079435','Flexidy Bank');`);
+      });
 
-      this.db.prepare('SELECT * FROM company', (err) => {
+      this.db.prepare("SELECT * FROM company", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async initTestCustomerData(accountId: number): Promise<void> {
@@ -172,17 +172,17 @@ class InitDB extends DB {
           (${accountId},'Mat Lam Tam','Buena Vista','888','1','64-630','Ryczywół','Poland','9954598880','76618335797783923466','Trippledex Bank'),
           (${accountId},'Stronghold','Harbort','329','87','75-571','Osiek nad Notecią','Poland','3176427991','74342351246453927637','Prodder Bank'),
           (${accountId},'Transcof','Montana','206','102','38-123','Wysoka Strzyżowska','Poland','7195596289','65693911804359744968','Hatity Bank'),
-          (${accountId},'Fintone','Kensington','92','25','34-105','Radocza','Poland','9729326333','27436131917979079435','Flexidy Bank');`)
-      })
+          (${accountId},'Fintone','Kensington','92','25','34-105','Radocza','Poland','9729326333','27436131917979079435','Flexidy Bank');`);
+      });
 
-      this.db.prepare('SELECT * FROM customer', (err) => {
+      this.db.prepare("SELECT * FROM customer", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async initTestInvoiceData(accountId: number, customerId: number): Promise<void> {
@@ -203,31 +203,31 @@ class InitDB extends DB {
           author
         ) VALUES
           (${accountId},${customerId},'abc001',1000,1230,230,'PLN',
-          '${new Date('2021-04-30').toISOString()}',
-          '${new Date('2021-05-07').toISOString()}',
+          '${new Date("2021-04-30").toISOString()}',
+          '${new Date("2021-05-07").toISOString()}',
           '7 dni', '01-04-2021 - 30-04-2021', 'Roberto Firmino'),
           (${accountId},${customerId},'abc002',1000,1230,230,'PLN',
-          '${new Date('2021-05-31').toISOString()}',
-          '${new Date('2021-06-07').toISOString()}',
+          '${new Date("2021-05-31").toISOString()}',
+          '${new Date("2021-06-07").toISOString()}',
           '7 dni', '01-05-2021 - 31-05-2021', 'Roberto Firmino'),
           (${accountId},${customerId},'abc003',1000,1230,230,'PLN',
-          '${new Date('2021-06-30').toISOString()}',
-          '${new Date('2021-07-07').toISOString()}',
+          '${new Date("2021-06-30").toISOString()}',
+          '${new Date("2021-07-07").toISOString()}',
           '7 dni', '01-06-2021 - 30-06-2021', 'Roberto Firmino'),
           (${accountId},${customerId},'abc004',1000,1230,230,'PLN',
-          '${new Date('2021-07-31').toISOString()}',
-          '${new Date('2021-08-07').toISOString()}',
-          '7 dni', '01-07-2021 - 31-07-2021', 'Roberto Firmino');`)
-      })
+          '${new Date("2021-07-31").toISOString()}',
+          '${new Date("2021-08-07").toISOString()}',
+          '7 dni', '01-07-2021 - 31-07-2021', 'Roberto Firmino');`);
+      });
 
-      this.db.prepare('SELECT * FROM invoice', (err) => {
+      this.db.prepare("SELECT * FROM invoice", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async initTestInvoicePositionData(invoiceId: number): Promise<void> {
@@ -248,83 +248,77 @@ class InitDB extends DB {
           currency
         ) VALUES
           (${invoiceId},'Software developing','62.01.Z','szt.',1,500,615,115,23,500,615,'PLN'),
-          (${invoiceId},'Software designing','62.01.Z','szt.',1,500,615,115,23,500,615,'PLN');`)
-      })
+          (${invoiceId},'Software designing','62.01.Z','szt.',1,500,615,115,23,500,615,'PLN');`);
+      });
 
-      this.db.prepare('SELECT * FROM invoice_position', (err) => {
+      this.db.prepare("SELECT * FROM invoice_position", (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve()
-      })
-    })
+        resolve();
+      });
+    });
   }
 
   public async deleteData(): Promise<any> {
     const deleteInvoicePosition = new Promise((resolve, reject) => {
       this.db.run(`DELETE FROM invoice_position`, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve('invoice position deleted')
-      })
-    })
+        resolve("invoice position deleted");
+      });
+    });
 
     const deleteInvoice = new Promise((resolve, reject) => {
       this.db.run(`DELETE FROM invoice`, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve('invoice deleted')
-      })
-    })
+        resolve("invoice deleted");
+      });
+    });
 
     const deleteCustomer = new Promise((resolve, reject) => {
       this.db.run(`DELETE FROM customer`, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve('customer deleted')
-      })
-    })
+        resolve("customer deleted");
+      });
+    });
 
     const deleteCompany = new Promise((resolve, reject) => {
       this.db.run(`DELETE FROM company`, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve('company deleted')
-      })
-    })
+        resolve("company deleted");
+      });
+    });
     const deleteAccount = new Promise((resolve, reject) => {
       this.db.run(`DELETE FROM account`, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         }
 
-        resolve('account deleted')
-      })
-    })
+        resolve("account deleted");
+      });
+    });
 
-    const results = []
-    for await (const query of [
-      deleteInvoicePosition,
-      deleteInvoice,
-      deleteCustomer,
-      deleteCompany,
-      deleteAccount,
-    ]) {
-      const result = await query
-      results.push(result)
+    const results = [];
+    for await (const query of [deleteInvoicePosition, deleteInvoice, deleteCustomer, deleteCompany, deleteAccount]) {
+      const result = await query;
+      results.push(result);
     }
 
-    return results
+    return results;
   }
 }
 
-export default new InitDB(connection)
+export default new InitDB(connection);

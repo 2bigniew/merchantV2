@@ -1,5 +1,5 @@
-import * as Joi from 'joi'
-import { currencySchema, dbObjectWrapperSchema, idSchema } from './index'
+import * as Joi from "joi";
+import { currencySchema, dbObjectWrapperSchema, idSchema } from "./index";
 
 export const createInvoicePositionSchema = Joi.object({
   invoiceId: idSchema.required(),
@@ -13,8 +13,8 @@ export const createInvoicePositionSchema = Joi.object({
   vatRate: Joi.number().integer().required(),
   totalValueNet: Joi.number().integer().required(),
   totalValue: Joi.number().integer().required(),
-  currency: currencySchema.required(),
-}).required()
+  currency: currencySchema.required()
+}).required();
 
 export const updateInvoicePositionSchema = Joi.object({
   id: idSchema.required(),
@@ -29,23 +29,26 @@ export const updateInvoicePositionSchema = Joi.object({
   vatRate: Joi.number().integer(),
   totalValueNet: Joi.number().integer(),
   totalValue: Joi.number().integer(),
-  currency: currencySchema,
-}).required()
+  currency: currencySchema
+}).required();
 
 export const deleteInvoicePositionSchema = Joi.object({
-  id: idSchema.required(),
-})
+  id: idSchema.required()
+});
 
-export const invoicePositionSchema = createInvoicePositionSchema.concat(dbObjectWrapperSchema)
+export const invoicePositionSchema = createInvoicePositionSchema.concat(dbObjectWrapperSchema);
 
 export const invoicePositionSchemasToCommandMap = {
-  'command.invoicePosition.create': createInvoicePositionSchema,
-  'command.invoicePosition.update': updateInvoicePositionSchema,
-  'command.invoicePosition.delete': deleteInvoicePositionSchema,
-}
+  "command.invoicePosition.create": createInvoicePositionSchema,
+  "command.invoicePosition.update": updateInvoicePositionSchema,
+  "command.invoicePosition.delete": deleteInvoicePositionSchema
+};
 
 export const invoicePositionSchemasToEventMap = {
-  'event.invoicePosition.created': { after: invoicePositionSchema },
-  'event.invoicePosition.updated': { before: invoicePositionSchema, after: invoicePositionSchema },
-  'event.invoicePosition.deleted': { before: invoicePositionSchema },
-}
+  "event.invoicePosition.created": { after: invoicePositionSchema },
+  "event.invoicePosition.updated": {
+    before: invoicePositionSchema,
+    after: invoicePositionSchema
+  },
+  "event.invoicePosition.deleted": { before: invoicePositionSchema }
+};

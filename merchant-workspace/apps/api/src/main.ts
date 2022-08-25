@@ -1,11 +1,12 @@
-import * as express from 'express';
-import * as socketIo from 'socket.io';
-import * as cors from 'cors';
-import { Message } from '@merchant-workspace/api-interfaces';
-import initDB from './app/services/db/init';
-import { initializeListeners } from './socket';
-import { router } from './router';
-import {fixtures} from "./app/services/db/fixtures";
+import * as express from "express";
+import * as socketIo from "socket.io";
+import { Message } from "@merchant-workspace/api-interfaces";
+import initDB from "./app/services/db/init";
+import { initializeListeners } from "./socket";
+import { router } from "./router";
+import { fixtures } from "./app/services/db/fixtures";
+import * as bodyParser from "body-parser";
+import { handleError } from "./app/middleware/errorHandlingMiddleware";
 
 const port = process.env.port || 3333;
 
@@ -14,25 +15,26 @@ const runServer = async (): Promise<void> => {
 
   try {
     await initDB.initHandler();
-    await fixtures()
+    await fixtures();
   } catch (e) {
     console.log(e);
   }
 
   const server = app.listen(port, () => {
-    console.log('Listening at http://localhost:' + port + '/core');
+    console.log("Listening at http://localhost:" + port + "/core");
   });
 
-  server.on('error', console.error);
+  server.on("error", console.error);
 
   const socketServer = new socketIo.Server(server, {
     cors: {
-      origin: ['http://localhost:4200'],
-      credentials: true,
-    },
+      origin: ["http://localhost:4200"],
+      credentials: true
+    }
   });
 
-  socketServer.on('connection', (socket) => {
+  socketServer.on("connection", (socket) => {
+    console.log("CONNECTION");
     initializeListeners(socket);
   });
 };
@@ -40,13 +42,17 @@ const runServer = async (): Promise<void> => {
 const appFactory = (): express.Express => {
   const app = express();
 
-  const greeting: Message = { message: 'Welcome to core!' };
+  app.use(bodyParser.json());
 
-  app.get('/api', (req, res) => {
+  const greeting: Message = { message: "Welcome to core!" };
+
+  app.get("/api", (req, res) => {
     res.send(greeting);
   });
 
-  app.use('/api/v1', router);
+  app.use("/api/v1", router);
+
+  app.use(handleError());
 
   return app;
 };

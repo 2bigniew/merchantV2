@@ -1,5 +1,5 @@
-import * as Joi from 'joi'
-import { dbObjectWrapperSchema, idSchema } from './index'
+import * as Joi from "joi";
+import { dbObjectWrapperSchema, idSchema } from "./index";
 
 export const createCompanySchema = Joi.object({
   accountId: idSchema.required(),
@@ -12,8 +12,8 @@ export const createCompanySchema = Joi.object({
   country: Joi.string().max(100).required(),
   nip: Joi.string().max(10).alphanum().required(),
   bankAccount: Joi.string().max(26).required(),
-  bankName: Joi.string().max(300),
-})
+  bankName: Joi.string().max(300)
+});
 
 export const updateCompanySchema = Joi.object({
   id: idSchema.required(),
@@ -27,23 +27,23 @@ export const updateCompanySchema = Joi.object({
   country: Joi.string().max(100),
   nip: Joi.string().max(10).alphanum(),
   bankAccount: Joi.string().max(26),
-  bankName: Joi.string().max(300),
-})
+  bankName: Joi.string().max(300)
+});
 
 export const deleteCompanySchema = Joi.object({
-  id: idSchema.required(),
-})
+  id: idSchema.required()
+});
 
-export const companySchema = createCompanySchema.concat(dbObjectWrapperSchema)
+export const companySchema = createCompanySchema.concat(dbObjectWrapperSchema);
 
 export const companySchemasToCommandMap = {
-  'command.company.create': createCompanySchema,
-  'command.company.update': updateCompanySchema,
-  'command.company.delete': deleteCompanySchema,
-}
+  "command.company.create": createCompanySchema,
+  "command.company.update": updateCompanySchema,
+  "command.company.delete": deleteCompanySchema
+};
 
 export const companySchemasToEventMap = {
-  'event.company.created': { after: companySchema },
-  'event.company.updated': { before: companySchema, after: companySchema },
-  'event.company.deleted': { after: companySchema },
-}
+  "event.company.created": { after: companySchema },
+  "event.company.updated": { before: companySchema, after: companySchema },
+  "event.company.deleted": { after: companySchema }
+};

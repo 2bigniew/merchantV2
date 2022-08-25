@@ -1,5 +1,5 @@
-import * as Joi from 'joi'
-import { dbObjectWrapperSchema, idSchema } from './index'
+import * as Joi from "joi";
+import { dbObjectWrapperSchema, idSchema } from "./index";
 
 export const createCustomerSchema = Joi.object({
   accountId: idSchema.required(),
@@ -12,8 +12,8 @@ export const createCustomerSchema = Joi.object({
   country: Joi.string().max(100).required(),
   nip: Joi.string().max(10).alphanum().required(),
   bankAccount: Joi.string().max(26).required(),
-  bankName: Joi.string().max(300),
-})
+  bankName: Joi.string().max(300)
+});
 
 export const updateCustomerSchema = Joi.object({
   id: idSchema.required(),
@@ -27,23 +27,23 @@ export const updateCustomerSchema = Joi.object({
   country: Joi.string().max(100),
   nip: Joi.string().max(10).alphanum(),
   bankAccount: Joi.string().max(26),
-  bankName: Joi.string().max(300),
-})
+  bankName: Joi.string().max(300)
+});
 
 export const deleteCustomerSchema = Joi.object({
-  id: idSchema.required(),
-})
+  id: idSchema.required()
+});
 
-export const customerSchema = createCustomerSchema.concat(dbObjectWrapperSchema)
+export const customerSchema = createCustomerSchema.concat(dbObjectWrapperSchema);
 
 export const customerSchemasToCommandMap = {
-  'command.customer.create': createCustomerSchema,
-  'command.customer.update': updateCustomerSchema,
-  'command.customer.delete': deleteCustomerSchema,
-}
+  "command.customer.create": createCustomerSchema,
+  "command.customer.update": updateCustomerSchema,
+  "command.customer.delete": deleteCustomerSchema
+};
 
 export const customerSchemasToEventMap = {
-  'event.customer.created': { after: customerSchema },
-  'event.customer.updated': { before: customerSchema, after: customerSchema },
-  'event.customer.deleted': { before: customerSchema },
-}
+  "event.customer.created": { after: customerSchema },
+  "event.customer.updated": { before: customerSchema, after: customerSchema },
+  "event.customer.deleted": { before: customerSchema }
+};
