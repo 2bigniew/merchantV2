@@ -1,27 +1,26 @@
 import React, {useEffect, useState} from 'react'
 import {Account} from "@merchant-workspace/api-interfaces";
 import query from "../core/query";
-import {useAsync} from "../hooks/useAsyncEffect";
+import {useToast} from "../hooks/useToast";
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const { execute, status, value: response, error} = useAsync(async () => query('api/v1/account/list', "GET"))
+  const { showError } = useToast()
 
   useEffect(() => {
-    if (response) {
+    fetchData().then((response) => {
       setAccounts(response)
-    }
+    }).catch((error) => {
+      showError(error)
+    })
+  }, [fetchData]);
 
-    if (error) {
-      console.error(error)
-    }
-  }, []);
 
   return <div>
     <h1>Choose account</h1>
     <ul>
       {accounts.map(({firstname, lastname, email, id}) => (
-        <li key={`${id}`}>{firstname} {lastname} <span>{email}</span><span>Login</span></li>
+        <li key={`${id}`}>{firstname} {lastname} <span>{email}</span>{' '}<span>Login</span></li>
       ))}
     </ul>
     <button>Create account</button>
@@ -29,3 +28,5 @@ const AccountList = () => {
 }
 
 export default AccountList
+
+const fetchData = async (): Promise<Account[]> => query('api/v1/account/list', "GET")

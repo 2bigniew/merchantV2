@@ -1,6 +1,7 @@
 import { Api } from "@merchant-workspace/api-interfaces";
 import { apiClient } from "./apiClient";
 import { AxiosError } from "axios";
+import {TOKEN_KEY} from "./context/accountContext";
 
 type HttpMethod = "GET" | "POST";
 type QueryObject = Record<string, unknown>;
@@ -60,17 +61,29 @@ async function query<URL extends keyof Api>(
   const fullUrl = `${url}${query}`;
   const endpointMethod: Api[URL]["method"] = httpMethod;
   const method = getHttpMethod(endpointMethod);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json"
+  }
 
-  // TODO get rid of casting
+  if (typeof window !== "undefined") {
+    const token = window.localStorage.getItem(TOKEN_KEY)
+
+    if (token) {
+      // TODO fix that
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      headers['Authorization'] = `Bearer ${token.replaceAll('"', '')}`
+    }
+  }
 
   try {
     if (body) {
-      const response = (await apiClient({ method, url: fullUrl, data: body })).data as Api[URL]["response"];
+      const response = (await apiClient({ method, url: fullUrl, data: body, headers })).data as Api[URL]["response"];
       return response;
     }
 
     if (!params || (params && !params.length)) {
-      const response = (await apiClient(fullUrl, { method })).data as Api[URL]["response"];
+      const response = (await apiClient(fullUrl, { method, headers })).data as Api[URL]["response"];
       return response;
     }
 
@@ -84,7 +97,7 @@ async function query<URL extends keyof Api>(
       i++;
     }
 
-    const response = (await apiClient(fullUrl, { method })).data as Api[URL]["response"]; // TODO get rid of casting
+    const response = (await apiClient(fullUrl, { method, headers })).data as Api[URL]["response"]; // TODO get rid of casting
     return response;
   } catch (error) {
     if (error instanceof AxiosError) {

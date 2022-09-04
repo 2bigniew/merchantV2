@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt";
-import {Account, Changed, ConflictError, CreateAccountPayload} from "@merchant-workspace/api-interfaces";
+import { Account, Changed, ConflictError, CreateAccountPayload } from "@merchant-workspace/api-interfaces";
 import accountRepository from "../account-repository";
 
 export const handler = async (payload: CreateAccountPayload): Promise<Changed<Account>> => {

@@ -1,34 +1,34 @@
 import { Request, Response, NextFunction } from "express";
 import { ValidationError } from "joi";
-import {AuthenticationError, ConflictError, NotFoundError} from "@merchant-workspace/api-interfaces";
+import { AuthenticationError, ConflictError, NotFoundError } from "@merchant-workspace/api-interfaces";
+import { logger } from "../services/logger";
 
-export const handleError = () => {
-  return function (err: Error, req: Request, res: Response, next: NextFunction) {
-    console.log(err)
-    // TODO add other error handling
-
-    if (err instanceof ValidationError) {
-      console.log(err.message);
-      res.status(401).send(err.message);
+export const errorHandlingMiddleware = () => {
+  return function (error: Error, req: Request, res: Response, next: NextFunction) {
+    if (error instanceof ValidationError) {
+      logger.error(error.message);
+      res.status(401).send(error.message);
     }
 
-    if (err instanceof NotFoundError) {
-      console.log(err.message);
-      res.status(err.status).send(err.message);
+    if (error instanceof NotFoundError) {
+      logger.error(error.message);
+      res.status(error.status).send(error.message);
     }
 
-    if (err instanceof AuthenticationError) {
-      console.log(err.message);
-      res.status(err.status).send(err.message);
+    if (error instanceof AuthenticationError) {
+      logger.error(error.message);
+      res.status(error.status).send(error.message);
     }
 
-    if (err instanceof ConflictError) {
-      console.log(err.message);
-      res.status(err.status).send(err.message);
+    if (error instanceof ConflictError) {
+      logger.error(error.message);
+      res.status(error.status).send(error.message);
+    }
+
+    if (error) {
+      logger.fatal(error);
     }
 
     next();
   };
 };
-
-
