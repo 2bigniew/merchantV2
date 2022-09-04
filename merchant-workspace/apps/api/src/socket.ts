@@ -8,11 +8,9 @@ import {
   CommandsNames
 } from "@merchant-workspace/api-interfaces";
 import EventService from "./app/services/event/eventService";
+import { logger } from "./app/services/logger";
 
 export const initializeListeners = (socket: Socket) => {
-  console.log("Socket: client connected");
-  console.log(socket.id);
-
   socket.on(COMMAND, async (args) => {
     EventService.onSocketCommandHandler(args);
   });
@@ -24,7 +22,7 @@ export const initializeListeners = (socket: Socket) => {
   socket.on("disconnect", () => {
     // TODO add user ids from socket connections instead of removing listeners
     // TODO temp - remove listeners
-    console.log("Socket: client disconnected");
+    logger.info("Socket: client disconnected");
   });
 };
 

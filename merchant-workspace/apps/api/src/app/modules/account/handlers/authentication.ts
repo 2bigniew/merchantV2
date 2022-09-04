@@ -17,10 +17,8 @@ export const handler = async (
 ): Promise<void> => {
   const { email, password } = validateSchema<AuthPayload>(req.body, schemas.account.authenticationSchema);
   const account = await accountRepository.getAccountByMail({
-    email,
+    email
   });
-
-  console.log(email)
 
   if (!account) {
     throw new NotFoundError(`Account ${email} not found`);

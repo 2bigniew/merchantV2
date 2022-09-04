@@ -56,7 +56,7 @@ export class AccountRepository extends DB {
   public async getAccountByAuthData(payload: AuthPayload): Promise<Account> {
     const dbObject = mapJSObjectToDBFormat(payload);
     const query = `SELECT * FROM ${this.tableName} ${prepareConditions(dbObject)} LIMIT 1;`;
-    console.log(query)
+    console.log(query);
     const accounts = await this.all<Account, undefined>(query);
 
     const account = accounts[0];

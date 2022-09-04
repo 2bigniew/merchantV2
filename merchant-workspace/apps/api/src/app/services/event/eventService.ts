@@ -12,6 +12,8 @@ import {
 } from "@merchant-workspace/api-interfaces";
 import { Socket } from "socket.io";
 import { getListenersCountForEvents, LISTENERS_COUNT_FOR_EVENTS, ListenersCountForEvents } from "./helpers";
+import * as Logger from "bunyan";
+import { createLogger } from "bunyan";
 
 export class EventService {
   listenersCountsForEvents: Partial<ListenersCountForEvents>;
@@ -19,9 +21,12 @@ export class EventService {
   // TODO add error handling
   // TODO REWRITE
 
-  private readonly logger = console;
+  private readonly logger: Logger;
 
   constructor(private readonly broker: EventEmitter) {
+    this.logger = createLogger({
+      name: EventService.name
+    });
     this.listenersCountsForEvents = {
       ...getListenersCountForEvents(),
       ...LISTENERS_COUNT_FOR_EVENTS
@@ -48,7 +53,7 @@ export class EventService {
         const response = await callback(payload);
         this.broker.emit(success, response);
       } catch (error) {
-        console.error(error);
+        this.logger.error(error);
         this.broker.emit(failure, error);
       }
     });
@@ -58,7 +63,7 @@ export class EventService {
     const listenersLimit = this.listenersCountsForEvents[eventName] || 1;
     if (this.broker.listenerCount(eventName) >= listenersLimit) {
       // TODO TEMP - find better solution
-      this.logger.log(`Listeners for ${eventName} was already declared`);
+      this.logger.trace(`Listeners for ${eventName} was already declared`);
       return;
     }
 
@@ -70,7 +75,7 @@ export class EventService {
       });
 
       if (event) {
-        this.logger.log(event);
+        this.logger.trace(event);
         this.emitSocketEvent(socket, event);
       }
     });
@@ -90,7 +95,7 @@ export class EventService {
   private emitSocketEvent(socket: Socket, socketEvent: Event | CommandFailure) {
     try {
       socket.emit(socketEvent.type, socketEvent);
-      this.logger.log(`Socket event emitted, type: ${socketEvent.type}, name: ${socketEvent.name}`);
+      this.logger.trace(`Socket event emitted, type: ${socketEvent.type}, name: ${socketEvent.name}`);
     } catch (e) {
       this.logger.error(e);
     }
@@ -134,7 +139,7 @@ export class EventService {
 
   private emitCommand(command: Command): void {
     this.broker.emit(command.name, command.payload);
-    this.logger.log(`Command: ${command.name} succeed`);
+    this.logger.trace(`Command: ${command.name} succeed`);
   }
 }
 

@@ -6,7 +6,9 @@ import { initializeListeners } from "./socket";
 import { router } from "./router";
 import { fixtures } from "./app/services/db/fixtures";
 import * as bodyParser from "body-parser";
-import { handleError } from "./app/middleware/errorHandlingMiddleware";
+import { errorHandlingMiddleware } from "./app/middleware/errorHandlingMiddleware";
+import { logger } from "./app/services/logger";
+import {authMiddleware} from "./app/middleware/authMiddleware";
 
 const port = process.env.port || 3333;
 
@@ -16,15 +18,15 @@ const runServer = async (): Promise<void> => {
   try {
     await initDB.initHandler();
     await fixtures();
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    logger.error(error);
   }
 
   const server = app.listen(port, () => {
-    console.log("Listening at http://localhost:" + port + "/core");
+    logger.info("Listening at http://localhost:" + port + "/core");
   });
 
-  server.on("error", console.error);
+  server.on("error", logger.error);
 
   const socketServer = new socketIo.Server(server, {
     cors: {
@@ -34,7 +36,7 @@ const runServer = async (): Promise<void> => {
   });
 
   socketServer.on("connection", (socket) => {
-    console.log("CONNECTION");
+    logger.info("Websocket connection established", socket.id);
     initializeListeners(socket);
   });
 };
@@ -44,6 +46,8 @@ const appFactory = (): express.Express => {
 
   app.use(bodyParser.json());
 
+  app.use(authMiddleware());
+
   const greeting: Message = { message: "Welcome to core!" };
 
   app.get("/api", (req, res) => {
@@ -52,7 +56,7 @@ const appFactory = (): express.Express => {
 
   app.use("/api/v1", router);
 
-  app.use(handleError());
+  app.use(errorHandlingMiddleware());
 
   return app;
 };
